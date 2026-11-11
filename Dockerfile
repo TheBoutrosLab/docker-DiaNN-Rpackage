@@ -1,36 +1,32 @@
-ARG MINIFORGE_VERSION=26.1.1-2
-ARG UBUNTU_VERSION=24.04
-ARG CONDA_ENV_PATH=/opt/conda/envs/tool_name
+# Rocker r-ver contains R without RStudio and fixes the CRAN package snapshot
+# for non-current R versions.
+ARG R_VERSION=4.5.2
+FROM rocker/r-ver:${R_VERSION}
 
-FROM condaforge/miniforge3:${MINIFORGE_VERSION} AS builder
+ARG DIANN_COMMIT=af538f6e2cd5ab715e1381632e17cb8f234ebf53
 
-ARG CONDA_ENV_PATH
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ca-certificates curl && \
+    rm -rf /var/lib/apt/lists/* && \
+    install2.r --error --skipinstalled data.table Rcpp RcppEigen && \
+    mkdir /tmp/diann-rpackage && \
+    curl --fail --location --show-error --silent \
+        "https://github.com/vdemichev/diann-rpackage/archive/${DIANN_COMMIT}.tar.gz" \
+        --output /tmp/diann-rpackage.tar.gz && \
+    tar -xzf /tmp/diann-rpackage.tar.gz --strip-components=1 \
+        -C /tmp/diann-rpackage && \
+    find /tmp/diann-rpackage/src -maxdepth 1 -type f \
+        \( -name '*.o' -o -name '*.dll' -o -name '*.so' -o -name '*.a' \) \
+        -delete && \
+    R CMD INSTALL --preclean /tmp/diann-rpackage && \
+    Rscript -e 'library(diann); stopifnot(as.character(packageVersion("diann")) == "1.0.1", is.function(diann_maxlfq))' && \
+    rm -rf /tmp/diann-rpackage /tmp/diann-rpackage.tar.gz
 
-# Use conda to install tools and dependencies into the configured environment path
-ARG TOOL_VERSION=X.X.X
-
-RUN mamba create -qy -p ${CONDA_ENV_PATH} \
-    -c bioconda \
-    -c conda-forge \
-    tool_name==${TOOL_VERSION} && \
-    mamba clean -afy
-
-# Deploy the target tools into a base image
-FROM ubuntu:${UBUNTU_VERSION} AS final
-
-ARG CONDA_ENV_PATH
-
-COPY --from=builder ${CONDA_ENV_PATH} ${CONDA_ENV_PATH}
-
-ENV CONDA_ENV_PATH="${CONDA_ENV_PATH}" \
-    PATH="${CONDA_ENV_PATH}/bin:${PATH}"
-
-# Add a new user/group called bldocker
 RUN groupadd -g 500001 bldocker && \
     useradd -r -u 500001 -g bldocker bldocker
 
-# Change the default user to bldocker from root
 USER bldocker
 
-LABEL   maintainer="Your Name <YourName@sbpdiscovery.org>" \
-        org.opencontainers.image.source=https://github.com/TheBoutrosLab/<REPO>
+LABEL maintainer="Chenghao Zhu <czhu@sbpdiscovery.org>" \
+      org.opencontainers.image.source="https://github.com/TheBoutrosLab/docker-DiaNN-Rpackage" \
+      org.opencontainers.image.description="R runtime with the DIA-NN R package for report quantitation"
