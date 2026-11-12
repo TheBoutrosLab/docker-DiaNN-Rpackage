@@ -1,46 +1,14 @@
 # Changelog
-All notable changes to the tool_name Docker file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
-
-This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
----
+All notable changes to the docker-DiaNN-Rpackage image are documented here.
+The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
-### Changed
-- Update base Ubuntu image version to `v24.04`
-- Switch to GitHub Packages registry in `CICD-base.yaml`
-- Update `metadata.yaml` and `PULL_REQUEST_TEMPLATE.md` and replace Docker Hub with GitHub Packages in the template
-- Changed something but it is not part of the last release.
-- Update to use `miniforge` for builder, version `26.1.1-2`
-- Install tool into tool-specific env dir
+
+## [af538f6] - 2026-11-10
 
 ### Added
-- Add `Docker-build-release.yaml`
-- Add `image_name` to `metadata.yaml`
 
----
+- Build a Rocker-based image from DIA-NN R package commit af538f6.
 
-## [1.0.0] - YYYY-MM-DD
-### Added
-- For new features.
-- Added item 1.
-
-### Changed
-- For changes in existing functionality.
-- Changed item 1.
-
-### Deprecated
-- For soon-to-be removed features.
-
-### Removed
-- For now removed features.
-- Removed item 1.
-
-### Fixed
-- For any bug fixes.
-- Fixed item 1.
-
-### Security
-- In case of vulnerabilities.
+[af538f6]: https://github.com/vdemichev/diann-rpackage/commit/af538f6e2cd5ab715e1381632e17cb8f234ebf53
